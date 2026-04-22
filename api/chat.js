@@ -1,10 +1,15 @@
+export const config = { api: { bodyParser: true } };
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', '*');
+  
   if (req.method === 'OPTIONS') return res.status(200).end();
+  
   try {
     const { apiKey, payload } = req.body;
+    
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -14,9 +19,11 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify(payload)
     });
+    
     const data = await response.json();
-    res.status(200).json(data);
+    return res.status(200).json(data);
+    
   } catch(e) {
-    res.status(500).json({ error: e.message });
+    return res.status(500).json({ error: e.message });
   }
 }
