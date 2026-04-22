@@ -99,7 +99,7 @@ textarea#txta::placeholder{color:var(--faint);font-style:italic;font-size:.87rem
 .res-area{background:#111;border:1px solid #222;border-radius:12px;padding:1rem;min-height:200px;}
 .res-ph{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;gap:.65rem;text-align:center;color:#333;}
 .res-ph .ico{font-size:1.8rem;}
-.res-ph p{font-size:.72rem;max-width:190px;line-height:1.6;font-style:italic;}
+.res-ph p{font-size:.72rem;max-width:200px;line-height:1.6;font-style:italic;}
 .res-sec{border-radius:10px;padding:.75rem;margin-bottom:.65rem;border-left:3px solid transparent;}
 .sec-urgente{background:var(--rojo-dark);border-left-color:var(--rojo);}
 .sec-negocio{background:var(--verde-dark);border-left-color:var(--verde);}
@@ -181,7 +181,7 @@ textarea#txta::placeholder{color:var(--faint);font-style:italic;font-size:.87rem
       </div>
       <div class="apikey-status" id="apikey-status"></div>
       <div style="font-family:'DM Mono',monospace;font-size:.5rem;color:#333;margin-top:.45rem;line-height:1.5;">
-        Obtén tu key en platform.claude.com → Obtener clave de API
+        Solo se guarda en tu dispositivo. Nadie más puede verla.
       </div>
     </div>
 
@@ -203,7 +203,7 @@ textarea#txta::placeholder{color:var(--faint);font-style:italic;font-size:.87rem
     <button class="btn btn-gold" id="btn-gen" onclick="generar()">✦ Generar resumen matutino</button>
 
     <div class="res-area" id="res-area">
-      <div class="res-ph"><div class="ico">◎</div><p>Configura tu API Key arriba y captura ideas para generar tu resumen.</p></div>
+      <div class="res-ph"><div class="ico">◎</div><p>Configura tu API Key y captura ideas para generar tu resumen.</p></div>
     </div>
   </div>
 
@@ -234,8 +234,8 @@ textarea#txta::placeholder{color:var(--faint);font-style:italic;font-size:.87rem
 <script>
 let tipoSel=null;
 function load(k,d){try{return JSON.parse(localStorage.getItem(k))??d;}catch{return d;}}
-let hoy=load('kmg5_hoy',[]);
-let hist=load('kmg5_hist',[]);
+let hoy=load('kmg6_hoy',[]);
+let hist=load('kmg6_hist',[]);
 let resumenActual='';
 
 (function(){
@@ -243,7 +243,7 @@ let resumenActual='';
   document.getElementById('top-fecha').innerHTML=
     d.toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short'}).toUpperCase()
     +'<br>'+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
-  const key=localStorage.getItem('kmg5_apikey');
+  const key=localStorage.getItem('kmg6_apikey');
   if(key){
     document.getElementById('apikey-input').value=key;
     const st=document.getElementById('apikey-status');
@@ -268,10 +268,10 @@ function guardarKey(){
   const st=document.getElementById('apikey-status');
   if(!val||!val.startsWith('sk-ant-')){
     st.className='apikey-status err';
-    st.textContent='⚠ La key debe empezar con sk-ant-';
+    st.textContent='⚠ Debe empezar con sk-ant-';
     return;
   }
-  localStorage.setItem('kmg5_apikey',val);
+  localStorage.setItem('kmg6_apikey',val);
   st.className='apikey-status ok';
   st.textContent='✓ API Key guardada';
   showToast('✦ API Key guardada');
@@ -365,7 +365,7 @@ function togDia(i){
   const b=document.getElementById('db'+i),h=document.getElementById('dh'+i),c=document.getElementById('chv'+i);
   const o=b.classList.toggle('vis');h.classList.toggle('open',o);c.classList.toggle('r',o);
 }
-function delDia(i){if(!confirm('¿Eliminar este día?'))return;hist.splice(i,1);save();renderHist();}
+function delDia(i){if(!confirm('¿Eliminar?'))return;hist.splice(i,1);save();renderHist();}
 
 function openRetomar(idx){
   const d=hist[idx];
@@ -388,8 +388,7 @@ function openRetomar(idx){
 
 function togRet(id){
   const sel=window._retSel;
-  const rb=document.getElementById('rb'+id);
-  const ri=document.getElementById('ri'+id);
+  const rb=document.getElementById('rb'+id),ri=document.getElementById('ri'+id);
   if(sel.has(id)){sel.delete(id);rb.textContent='+ Retomar';ri.style.background='';ri.style.borderColor='';}
   else{sel.add(id);rb.textContent='✓ Seleccionado';ri.style.background='#FFFBF0';ri.style.borderColor='var(--dorado-brd)';}
 }
@@ -401,7 +400,7 @@ function confirmRet(idx){
     hoy.unshift({...i,id:Date.now()+Math.random()*1000|0,hora:new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})})
   );
   save();renderHoy();updStats();updBadges();closeModal();ir(0);
-  showToast('✦ '+sel.size+' elemento'+(sel.size>1?'s':'')+' retomado'+(sel.size>1?'s':''));
+  showToast('✦ '+sel.size+' retomado'+(sel.size>1?'s':''));
 }
 
 function verDia(idx){
@@ -433,35 +432,41 @@ function updBadges(){
 
 async function generar(){
   if(!hoy.length){showToast('Agrega capturas primero');return;}
-  const apiKey=localStorage.getItem('kmg5_apikey');
+  const apiKey=localStorage.getItem('kmg6_apikey');
   if(!apiKey){showToast('Configura tu API Key primero');return;}
   const btn=document.getElementById('btn-gen');
   const area=document.getElementById('res-area');
   btn.disabled=true;btn.textContent='⋯ Analizando...';
   area.innerHTML=`<div class="typing"><div class="dots"><span></span><span></span><span></span></div><span>El agente procesa tu banco...</span></div>`;
+
   const lista=hoy.map((c,i)=>`${i+1}. [${c.tipo.toUpperCase()}] ${c.texto}`).join('\n');
   const hoyStr=new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
   const prompt=`Eres el agente personal de Kevin Murguía, empresario con TDAH que dirige KM&G Consultores en Zapopan, México. Sus 3 objetivos este año: 1) Crecer KM&G y abrir nuevas líneas, 2) Generar ingresos fuera del despacho, 3) Desarrollarse como líder y mejor persona.
 
 Hoy es ${hoyStr}. Banco de capturas:
 ${lista}
 
 Responde ÚNICAMENTE con JSON válido, sin texto adicional, sin markdown:
-{"urgente":[{"texto":"...","accion":"paso concreto ahora"}],"negocio":[{"texto":"...","accion":"paso concreto"}],"delegar":[{"texto":"...","accion":"a quién y cómo"}],"idea":[{"texto":"...","accion":"cuándo desarrollarla"}],"personal":[{"texto":"...","accion":"paso concreto"}],"soltar":["texto que no aporta"],"insight":"observación honesta en máximo 3 oraciones sobre el patrón de sus capturas"}
+{"urgente":[{"texto":"...","accion":"paso concreto ahora"}],"negocio":[{"texto":"...","accion":"paso concreto"}],"delegar":[{"texto":"...","accion":"a quién y cómo"}],"idea":[{"texto":"...","accion":"cuándo desarrollarla"}],"personal":[{"texto":"...","accion":"paso concreto"}],"soltar":["texto que no aporta"],"insight":"observación honesta máximo 3 oraciones sobre el patrón de sus capturas"}
 
-Reglas: cada categoría solo incluye capturas que realmente pertenecen ahí. Si no hay elementos usa []. Accion debe ser específica: quién, qué, cuándo. Lenguaje directo sin corporativismo.`;
+Reglas: cada categoría solo incluye capturas que realmente pertenecen ahí. Si no hay elementos usa []. Accion específica: quién, qué, cuándo. Lenguaje directo sin corporativismo.`;
 
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{
+    // Usar el proxy de Vercel /api/chat
+    const r=await fetch('/api/chat',{
       method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key':apiKey,
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:prompt}]})
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        apiKey,
+        payload:{
+          model:'claude-sonnet-4-20250514',
+          max_tokens:1500,
+          messages:[{role:'user',content:prompt}]
+        }
+      })
     });
+
     if(!r.ok){const e=await r.json();throw new Error(e.error?.message||'Error '+r.status);}
     const data=await r.json();
     const txt=data.content?.[0]?.text||'';
@@ -472,10 +477,10 @@ Reglas: cada categoría solo incluye capturas que realmente pertenecen ahí. Si 
     showToast('✦ Resumen listo');
     btn.textContent='↺ Regenerar';
   }catch(e){
-    let msg='⚠ Error de conexión. Verifica tu red.';
-    if(e.message?.includes('401')||e.message?.includes('invalid_api_key'))msg='⚠ API Key inválida. Verifica que sea correcta.';
-    else if(e.message?.includes('429'))msg='⚠ Límite de uso alcanzado. Intenta en un momento.';
-    else if(e.message?.includes('insufficient_quota'))msg='⚠ Sin créditos. Recarga en platform.claude.com';
+    let msg='⚠ Error al generar. Intenta de nuevo.';
+    if(e.message?.includes('401')||e.message?.includes('invalid_api_key'))msg='⚠ API Key inválida.';
+    else if(e.message?.includes('429'))msg='⚠ Límite alcanzado. Espera un momento.';
+    else if(e.message?.includes('insufficient'))msg='⚠ Sin créditos. Recarga en platform.claude.com';
     area.innerHTML=`<div class="res-ph"><div class="ico">⚠</div><p style="color:#e57373;font-style:normal;">${msg}</p></div>`;
     btn.textContent='✦ Generar resumen matutino';
   }
@@ -513,8 +518,8 @@ function renderResumen(res){
 }
 
 function save(){
-  localStorage.setItem('kmg5_hoy',JSON.stringify(hoy));
-  localStorage.setItem('kmg5_hist',JSON.stringify(hist));
+  localStorage.setItem('kmg6_hoy',JSON.stringify(hoy));
+  localStorage.setItem('kmg6_hist',JSON.stringify(hist));
 }
 function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
