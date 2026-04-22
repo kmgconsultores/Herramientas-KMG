@@ -142,15 +142,11 @@ textarea#txta::placeholder{color:var(--faint);font-style:italic;font-size:.87rem
 </style>
 </head>
 <body>
-
 <div class="topbar">
   <div class="logo">✦ KMG</div>
   <div class="top-fecha" id="top-fecha"></div>
 </div>
-
 <div class="main">
-
-  <!-- CAPTURA -->
   <div class="screen on" id="sc-cap">
     <div class="stitle">Captura libre</div>
     <div class="card">
@@ -168,11 +164,8 @@ textarea#txta::placeholder{color:var(--faint);font-style:italic;font-size:.87rem
     <div id="lista-hoy"></div>
     <button class="btn btn-outline" onclick="cerrarDia()">↺ Cerrar día → guardar en historial</button>
   </div>
-
-  <!-- RESUMEN IA -->
   <div class="screen screen-dark" id="sc-res">
     <div class="stitle" style="color:var(--dorado);">Agente IA</div>
-
     <div class="apikey-wrap">
       <div class="apikey-lbl">🔑 API Key de Anthropic</div>
       <div class="apikey-row">
@@ -180,18 +173,14 @@ textarea#txta::placeholder{color:var(--faint);font-style:italic;font-size:.87rem
         <button class="apikey-btn" onclick="guardarKey()">Guardar</button>
       </div>
       <div class="apikey-status" id="apikey-status"></div>
-      <div style="font-family:'DM Mono',monospace;font-size:.5rem;color:#333;margin-top:.45rem;line-height:1.5;">
-        Solo se guarda en tu dispositivo. Nadie más puede verla.
-      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:.5rem;color:#333;margin-top:.45rem;line-height:1.5;">Solo se guarda en tu dispositivo. Nadie más puede verla.</div>
     </div>
-
     <div class="obj-wrap">
       <div class="obj-lbl">Objetivos 2025 — filtro de relevancia</div>
       <span class="obj-chip">↑ Crecer KM&G</span>
       <span class="obj-chip">↑ Nuevas fuentes de ingreso</span>
       <span class="obj-chip">↑ Líder y mejor persona</span>
     </div>
-
     <div class="srow">
       <div class="sbox"><span class="n" id="s0">0</span><span class="l">Total</span></div>
       <div class="sbox"><span class="n" id="s1" style="color:#e57373">0</span><span class="l">Urgente</span></div>
@@ -199,30 +188,22 @@ textarea#txta::placeholder{color:var(--faint);font-style:italic;font-size:.87rem
       <div class="sbox"><span class="n" id="s3" style="color:#CE93D8">0</span><span class="l">Delegar</span></div>
       <div class="sbox"><span class="n" id="s4" style="color:#FFB74D">0</span><span class="l">Pers.</span></div>
     </div>
-
     <button class="btn btn-gold" id="btn-gen" onclick="generar()">✦ Generar resumen matutino</button>
-
     <div class="res-area" id="res-area">
       <div class="res-ph"><div class="ico">◎</div><p>Configura tu API Key y captura ideas para generar tu resumen.</p></div>
     </div>
   </div>
-
-  <!-- HISTORIAL -->
   <div class="screen" id="sc-hist">
     <div class="stitle">Historial de días</div>
     <div id="lista-hist"></div>
   </div>
-
 </div>
-
 <nav class="bnav">
   <button class="nb on" id="nb0" onclick="ir(0)"><span class="ic">✏️</span>Captura<span class="nbadge" id="nbadge" style="display:none">0</span></button>
   <button class="nb" id="nb1" onclick="ir(1)"><span class="ic">✦</span>Agente</button>
   <button class="nb" id="nb2" onclick="ir(2)"><span class="ic">📅</span>Historial<span class="nbadge" id="hbadge" style="display:none">0</span></button>
 </nav>
-
 <div class="toast" id="toast"></div>
-
 <div class="modal-ov" id="modal" onclick="closeModal(event)">
   <div class="modal-sh">
     <div class="mhandle"></div>
@@ -230,12 +211,11 @@ textarea#txta::placeholder{color:var(--faint);font-style:italic;font-size:.87rem
     <div id="mbody"></div>
   </div>
 </div>
-
 <script>
 let tipoSel=null;
 function load(k,d){try{return JSON.parse(localStorage.getItem(k))??d;}catch{return d;}}
-let hoy=load('kmg6_hoy',[]);
-let hist=load('kmg6_hist',[]);
+let hoy=load('kmg7_hoy',[]);
+let hist=load('kmg7_hist',[]);
 let resumenActual='';
 
 (function(){
@@ -243,7 +223,7 @@ let resumenActual='';
   document.getElementById('top-fecha').innerHTML=
     d.toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short'}).toUpperCase()
     +'<br>'+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
-  const key=localStorage.getItem('kmg6_apikey');
+  const key=localStorage.getItem('kmg7_apikey');
   if(key){
     document.getElementById('apikey-input').value=key;
     const st=document.getElementById('apikey-status');
@@ -266,14 +246,9 @@ function ir(i){
 function guardarKey(){
   const val=document.getElementById('apikey-input').value.trim();
   const st=document.getElementById('apikey-status');
-  if(!val||!val.startsWith('sk-ant-')){
-    st.className='apikey-status err';
-    st.textContent='⚠ Debe empezar con sk-ant-';
-    return;
-  }
-  localStorage.setItem('kmg6_apikey',val);
-  st.className='apikey-status ok';
-  st.textContent='✓ API Key guardada';
+  if(!val||!val.startsWith('sk-ant-')){st.className='apikey-status err';st.textContent='⚠ Debe empezar con sk-ant-';return;}
+  localStorage.setItem('kmg7_apikey',val);
+  st.className='apikey-status ok';st.textContent='✓ API Key guardada';
   showToast('✦ API Key guardada');
 }
 
@@ -288,11 +263,9 @@ function guardar(){
   if(!v){showToast('Escribe algo primero');return;}
   hoy.unshift({id:Date.now(),texto:v,tipo:tipoSel||'general',hora:new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})});
   save();
-  document.getElementById('txta').value='';
-  tipoSel=null;
+  document.getElementById('txta').value='';tipoSel=null;
   document.querySelectorAll('.pill').forEach(p=>p.className='pill');
-  renderHoy();updStats();updBadges();
-  showToast('✦ Capturado');
+  renderHoy();updStats();updBadges();showToast('✦ Capturado');
 }
 
 function renderHoy(){
@@ -319,8 +292,7 @@ function cerrarDia(){
   const idx=hist.findIndex(d=>d.fecha===fk);
   if(idx>=0){hist[idx].items=[...hist[idx].items,...hoy];if(resumenActual)hist[idx].resumen=resumenActual;}
   else hist.unshift({fecha:fk,items:[...hoy],resumen:resumenActual,ts:Date.now()});
-  hoy=[];resumenActual='';
-  save();renderHoy();renderHist();updStats();updBadges();
+  hoy=[];resumenActual='';save();renderHoy();renderHist();updStats();updBadges();
   document.getElementById('res-area').innerHTML=`<div class="res-ph"><div class="ico">◎</div><p>Banco limpio. Listo para un nuevo día.</p></div>`;
   document.getElementById('btn-gen').textContent='✦ Generar resumen matutino';
   showToast('✦ Día cerrado y guardado');
@@ -432,7 +404,7 @@ function updBadges(){
 
 async function generar(){
   if(!hoy.length){showToast('Agrega capturas primero');return;}
-  const apiKey=localStorage.getItem('kmg6_apikey');
+  const apiKey=localStorage.getItem('kmg7_apikey');
   if(!apiKey){showToast('Configura tu API Key primero');return;}
   const btn=document.getElementById('btn-gen');
   const area=document.getElementById('res-area');
@@ -448,25 +420,26 @@ Hoy es ${hoyStr}. Banco de capturas:
 ${lista}
 
 Responde ÚNICAMENTE con JSON válido, sin texto adicional, sin markdown:
-{"urgente":[{"texto":"...","accion":"paso concreto ahora"}],"negocio":[{"texto":"...","accion":"paso concreto"}],"delegar":[{"texto":"...","accion":"a quién y cómo"}],"idea":[{"texto":"...","accion":"cuándo desarrollarla"}],"personal":[{"texto":"...","accion":"paso concreto"}],"soltar":["texto que no aporta"],"insight":"observación honesta máximo 3 oraciones sobre el patrón de sus capturas"}
+{"urgente":[{"texto":"...","accion":"paso concreto ahora"}],"negocio":[{"texto":"...","accion":"paso concreto"}],"delegar":[{"texto":"...","accion":"a quién y cómo"}],"idea":[{"texto":"...","accion":"cuándo desarrollarla"}],"personal":[{"texto":"...","accion":"paso concreto"}],"soltar":["texto que no aporta"],"insight":"observación honesta máximo 3 oraciones"}
 
-Reglas: cada categoría solo incluye capturas que realmente pertenecen ahí. Si no hay elementos usa []. Accion específica: quién, qué, cuándo. Lenguaje directo sin corporativismo.`;
+Reglas: cada categoría solo incluye capturas que pertenecen ahí. Si no hay elementos usa []. Accion específica: quién, qué, cuándo. Lenguaje directo.`;
 
   try{
-    // Usar el proxy de Vercel /api/chat
-    const r=await fetch('/api/chat',{
+    // Llamada directa al API de Anthropic con header especial para browser
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':apiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
       body:JSON.stringify({
-        apiKey,
-        payload:{
-          model:'claude-sonnet-4-20250514',
-          max_tokens:1500,
-          messages:[{role:'user',content:prompt}]
-        }
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1500,
+        messages:[{role:'user',content:prompt}]
       })
     });
-
     if(!r.ok){const e=await r.json();throw new Error(e.error?.message||'Error '+r.status);}
     const data=await r.json();
     const txt=data.content?.[0]?.text||'';
@@ -518,8 +491,8 @@ function renderResumen(res){
 }
 
 function save(){
-  localStorage.setItem('kmg6_hoy',JSON.stringify(hoy));
-  localStorage.setItem('kmg6_hist',JSON.stringify(hist));
+  localStorage.setItem('kmg7_hoy',JSON.stringify(hoy));
+  localStorage.setItem('kmg7_hist',JSON.stringify(hist));
 }
 function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
